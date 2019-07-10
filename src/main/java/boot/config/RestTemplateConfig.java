@@ -27,35 +27,6 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class RestTemplateConfig {
 
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate(httpRequestFactory());
-    }
 
-    @Bean
-    public ClientHttpRequestFactory httpRequestFactory() {
-        return new HttpComponentsClientHttpRequestFactory(httpClient());
-    }
-
-    @Bean
-    public HttpClient httpClient() {
-        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                .register("https", SSLConnectionSocketFactory.getSocketFactory())
-                .build();
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(registry);
-        connectionManager.setMaxTotal(1);
-        connectionManager.setDefaultMaxPerRoute(1);
-        connectionManager.setValidateAfterInactivity(2000);
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(5000) //服务器返回数据(response)的时间，超过抛出read timeout
-                .setConnectTimeout(3000) //连接上服务器(握手成功)的时间，超出抛出connect timeout
-                .setConnectionRequestTimeout(3000)//从连接池中获取连接的超时时间，超时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
-                .build();
-        return HttpClientBuilder.create()
-                .setDefaultRequestConfig(requestConfig)
-                .setConnectionManager(connectionManager)
-                .build();
-    }
 
 }

@@ -4,7 +4,15 @@ import boot.domain.AliasClass;
 import boot.domain.Student;
 import boot.domain.User;
 import boot.service.UserService;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.remoting.support.SimpleHttpServerFactoryBean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +34,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @GetMapping("/list")
     public List<User> list() {
         System.out.println("执行list----------");
@@ -42,11 +53,14 @@ public class UserController {
     public void test() {
         System.out.println("----------执行test----------");
 
+        ClientHttpRequestFactory test = restTemplate.getRequestFactory();
+        System.out.println("SimpleClientHttpRequestFactory: " + (test instanceof SimpleClientHttpRequestFactory));
+        System.out.println("HttpComponentsClientHttpRequestFactory: " + (test instanceof HttpComponentsClientHttpRequestFactory));
+
         try {
-            RestTemplate restTemplate = new RestTemplate();
-            for (int index=0; index<10; index++){
+            for (int index = 0; index < 20; index++) {
                 AliasClass aClass = restTemplate.getForObject("http://localhost:8090/class", AliasClass.class);
-                System.out.println(Thread.currentThread()+" --> 执行index --> " + index);
+                System.out.println(Thread.currentThread() + " --> 执行index --> " + index);
             }
         } catch (HttpClientErrorException e) {
             System.out.println("http客户端请求出错了！");
