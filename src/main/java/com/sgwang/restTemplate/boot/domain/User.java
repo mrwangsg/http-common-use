@@ -1,4 +1,4 @@
-package boot.domain;
+package com.sgwang.restTemplate.boot.domain;
 
 import javax.persistence.*;
 

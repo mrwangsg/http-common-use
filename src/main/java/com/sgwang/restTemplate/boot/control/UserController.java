@@ -1,24 +1,20 @@
-package boot.control;
+package com.sgwang.restTemplate.boot.control;
 
-import boot.domain.AliasClass;
-import boot.domain.Student;
-import boot.domain.User;
-import boot.service.UserService;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import com.sgwang.restTemplate.boot.domain.AliasClass;
+import com.sgwang.restTemplate.boot.domain.User;
+import com.sgwang.restTemplate.boot.service.UserService;
+import com.sgwang.restTemplate.boot.tool.Payload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.remoting.support.SimpleHttpServerFactoryBean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -59,8 +55,9 @@ public class UserController {
 
         try {
             for (int index = 0; index < 20; index++) {
-                AliasClass aClass = restTemplate.getForObject("http://localhost:8090/class", AliasClass.class);
-                System.out.println(Thread.currentThread() + " --> 执行index --> " + index);
+                Payload payload = restTemplate.getForObject("http://localhost:8090/class", Payload.class);
+
+                System.out.println("payload: " + payload.toString());
             }
         } catch (HttpClientErrorException e) {
             System.out.println("http客户端请求出错了！");

@@ -1,6 +1,6 @@
-package boot.dao;
+package com.sgwang.restTemplate.boot.dao;
 
-import boot.domain.User;
+import com.sgwang.restTemplate.boot.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

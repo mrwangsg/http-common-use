@@ -1,7 +1,8 @@
-package boot.service;
+package com.sgwang.restTemplate.boot.service;
 
-import boot.dao.UserRepository;
-import boot.domain.User;
+
+import com.sgwang.restTemplate.boot.dao.UserRepository;
+import com.sgwang.restTemplate.boot.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

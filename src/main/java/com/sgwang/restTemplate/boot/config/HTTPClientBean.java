@@ -1,4 +1,4 @@
-package boot;
+package com.sgwang.restTemplate.boot.config;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -9,29 +9,24 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.stereotype.Component;
 
 /**
  * @创建人 sgwang
- * @name ApplicationStart
+ * @name HTTPClientBean
  * @user shiguang.wang
- * @创建时间 2019/7/8
+ * @创建时间 2019/7/12
  * @描述
  */
-@SpringBootApplication
-public class ApplicationStart {
-    public static void main(String[] args) {
-        SpringApplication.run(ApplicationStart.class);
-    }
+@Component
+public class HTTPClientBean implements ClientFactory{
 
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate(httpRequestFactory());
+    @Override
+    public ClientHttpRequestFactory execute() {
+        return null;
     }
 
     @Bean
