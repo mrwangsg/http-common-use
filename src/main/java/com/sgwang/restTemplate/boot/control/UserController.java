@@ -13,10 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @创建人 sgwang
@@ -52,14 +51,23 @@ public class UserController {
 
         Payload payload = null;
 
-        for (int index = 0; index < 20; index++) {
-            try {
-                payload = restTemplate.getForObject("http://localhost:8090/class", Payload.class);
+        ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
-                System.out.println("payload: " + payload.toString());
-            }catch (SimpleHttpException exception){
-                System.out.println("index: " + index + ",   exception: " + exception.getMessage());
-            }
+        for (int num = 0; num < 10; num++) {
+            cachedThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    for (int index = 0; index < 10; index++) {
+                        try {
+                            Payload payload = restTemplate.getForObject("http://localhost:8090/class", Payload.class);
+
+                            System.out.println("payload: " + payload.toString());
+                        } catch (SimpleHttpException exception) {
+                            System.out.println("currentThread: " + Thread.currentThread() + "index: " + index + ",   exception: " + exception.getMessage());
+                        }
+                    }
+                }
+            });
         }
 
         return payload;
