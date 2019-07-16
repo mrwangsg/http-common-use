@@ -1,21 +1,25 @@
 package com.sgwang.restTemplate.boot.config;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import com.sgwang.restTemplate.boot.handler.SimpleResponseHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.UnknownHttpStatusCodeException;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @创建人 sgwang
@@ -31,16 +35,27 @@ public class RestTemplateConfig {
     private String requestFactory;
 
     @Autowired
-    private SimpleClientBean simpleClient;
+    private SimpleClientBean simpleClientBean;
 
     @Autowired
-    private HTTPClientBean httpClient;
+    private HTTPClientBean httpClientBean;
+
+    @Autowired
+    private SimpleResponseHandler simpleResponseHandler;
 
     @Bean
     public RestTemplate restTemplate() {
         ClientHttpRequestFactory httpRequestFactory = getHttpRequestFactory();
 
         RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
+
+        // 添加格式转换器。tip如果添加了，会删除RestTemplate之前默认的转换器
+        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+        messageConverters.add(new MappingJackson2HttpMessageConverter());
+        restTemplate.setMessageConverters(messageConverters);
+
+        // 设置异常处理
+        restTemplate.setErrorHandler(simpleResponseHandler);
 
         return restTemplate;
     }
@@ -52,10 +67,10 @@ public class RestTemplateConfig {
         // 穷举有 SimpleClient、HttpClient、OkHttp3Client、Netty4Client
         switch (requestFactory) {
             case "SimpleClient":
-                httpRequestFactory = simpleClient.execute();
+                httpRequestFactory = simpleClientBean.execute();
                 break;
             case "HttpClient":
-                httpRequestFactory = httpClient.execute();
+                httpRequestFactory = httpClientBean.execute();
                 break;
             case "OkHttp3Client":
                 break;
@@ -66,6 +81,21 @@ public class RestTemplateConfig {
         }
 
         return httpRequestFactory;
+    }
+
+    protected byte[] getResponseBody(ClientHttpResponse response) {
+        try {
+            return FileCopyUtils.copyToByteArray(response.getBody());
+        } catch (IOException ex) {
+            // ignore
+        }
+        return new byte[0];
+    }
+
+    protected Charset getCharset(ClientHttpResponse response) {
+        HttpHeaders headers = response.getHeaders();
+        MediaType contentType = headers.getContentType();
+        return (contentType != null ? contentType.getCharset() : null);
     }
 
 

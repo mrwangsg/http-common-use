@@ -1,6 +1,7 @@
 package com.sgwang.restTemplate.boot.config;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,7 +16,11 @@ public class SimpleClientBean implements ClientFactory{
 
     @Override
     public ClientHttpRequestFactory execute() {
-        return null;
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(10000);
+        requestFactory.setReadTimeout(10000);
+
+        return requestFactory;
     }
 
 }

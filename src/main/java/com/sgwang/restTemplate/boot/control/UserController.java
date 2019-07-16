@@ -2,6 +2,7 @@ package com.sgwang.restTemplate.boot.control;
 
 import com.sgwang.restTemplate.boot.domain.AliasClass;
 import com.sgwang.restTemplate.boot.domain.User;
+import com.sgwang.restTemplate.boot.exception.SimpleHttpException;
 import com.sgwang.restTemplate.boot.service.UserService;
 import com.sgwang.restTemplate.boot.tool.Payload;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,31 +39,29 @@ public class UserController {
         System.out.println("执行list----------");
         List<User> users = userService.findAll();
 
-        for (User user : users) {
-            System.out.println(user.getName());
-        }
-
         return userService.findAll();
     }
 
     @GetMapping("/test")
-    public void test() {
+    public Payload test() {
         System.out.println("----------执行test----------");
 
         ClientHttpRequestFactory test = restTemplate.getRequestFactory();
         System.out.println("SimpleClientHttpRequestFactory: " + (test instanceof SimpleClientHttpRequestFactory));
         System.out.println("HttpComponentsClientHttpRequestFactory: " + (test instanceof HttpComponentsClientHttpRequestFactory));
 
-        try {
-            for (int index = 0; index < 20; index++) {
-                Payload payload = restTemplate.getForObject("http://localhost:8090/class", Payload.class);
+        Payload payload = null;
+
+        for (int index = 0; index < 20; index++) {
+            try {
+                payload = restTemplate.getForObject("http://localhost:8090/class", Payload.class);
 
                 System.out.println("payload: " + payload.toString());
+            }catch (SimpleHttpException exception){
+                System.out.println("index: " + index + ",   exception: " + exception.getMessage());
             }
-        } catch (HttpClientErrorException e) {
-            System.out.println("http客户端请求出错了！");
-            //开发中可以使用统一异常处理，或者在业务逻辑的catch中作响应
         }
 
+        return payload;
     }
 }
