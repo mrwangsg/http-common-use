@@ -28,7 +28,7 @@ public class SimpleResponseHandler extends DefaultResponseErrorHandler {
     @Override
     public void handleError(ClientHttpResponse response) throws IOException {
         if (hasError(response)) {
-            throw new SimpleHttpException("简单测试！");
+            throw new SimpleHttpException("简单测试！    code: " + response.getRawStatusCode());
         }
         super.handleError(response);
     }

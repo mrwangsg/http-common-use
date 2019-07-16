@@ -17,8 +17,8 @@ public class SimpleClientBean implements ClientFactory{
     @Override
     public ClientHttpRequestFactory execute() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(10000);
-        requestFactory.setReadTimeout(10000);
+        requestFactory.setConnectTimeout(3000);
+        requestFactory.setReadTimeout(3000);
 
         return requestFactory;
     }

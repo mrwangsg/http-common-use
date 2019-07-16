@@ -1,6 +1,5 @@
 package com.sgwang.restTemplate.boot.control;
 
-import com.sgwang.restTemplate.boot.domain.AliasClass;
 import com.sgwang.restTemplate.boot.domain.User;
 import com.sgwang.restTemplate.boot.exception.SimpleHttpException;
 import com.sgwang.restTemplate.boot.service.UserService;
@@ -12,10 +11,11 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 /**
