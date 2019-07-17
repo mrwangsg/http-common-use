@@ -1,12 +1,14 @@
 package com.sgwang.restTemplate.boot.config;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.context.annotation.Bean;
@@ -51,7 +53,11 @@ public class HTTPClientBean implements ClientFactory{
                 .setConnectTimeout(3000) //连接上服务器(握手成功)的时间，超出抛出connect timeout
                 .setConnectionRequestTimeout(10000)//从连接池中获取连接的超时时间，超时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
                 .build();
+
+        // 第二个参数设置true，则表示无论如何 同一个请求均发送三次。false表示，只有在失败的时候，尝试再次发送
+        HttpRequestRetryHandler retryHandler = new DefaultHttpRequestRetryHandler(3, false);
         return HttpClientBuilder.create()
+                .setRetryHandler(retryHandler)
                 .setDefaultRequestConfig(requestConfig)
                 .setConnectionManager(connectionManager)
                 .build();
