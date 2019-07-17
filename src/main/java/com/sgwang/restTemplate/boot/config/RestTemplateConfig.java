@@ -83,20 +83,4 @@ public class RestTemplateConfig {
         return httpRequestFactory;
     }
 
-    protected byte[] getResponseBody(ClientHttpResponse response) {
-        try {
-            return FileCopyUtils.copyToByteArray(response.getBody());
-        } catch (IOException ex) {
-            // ignore
-        }
-        return new byte[0];
-    }
-
-    protected Charset getCharset(ClientHttpResponse response) {
-        HttpHeaders headers = response.getHeaders();
-        MediaType contentType = headers.getContentType();
-        return (contentType != null ? contentType.getCharset() : null);
-    }
-
-
 }

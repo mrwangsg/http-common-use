@@ -51,11 +51,11 @@ public class UserController {
 
         Payload payload = null;
 
-        ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+        ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);
 
         // 这里线程池的个数 会直接影响到 ReadTimeout 毕竟线程多时 会出现阻塞一直无法执行。
-        for (int num = 0; num < 30; num++) {
-            cachedThreadPool.execute(new Runnable() {
+        for (int num = 0; num < 10; num++) {
+            fixedThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
                     for (int index = 0; index < 10; index++) {
