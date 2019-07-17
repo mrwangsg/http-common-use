@@ -45,8 +45,10 @@ public class HTTPClientBean implements ClientFactory{
         connectionManager.setDefaultMaxPerRoute(3);
         // 官方推荐使用这个来检查永久链接的可用性，而不推荐每次请求的时候才去检查，而是启动后台线程 定时清理废弃链接
         connectionManager.setValidateAfterInactivity(2000);
-        connectionManager.closeIdleConnections(100, TimeUnit.MILLISECONDS);
-        connectionManager.closeExpiredConnections();
+
+//        这两个参数 可以自己设置线程 定时调用
+//        connectionManager.closeIdleConnections(100, TimeUnit.MILLISECONDS);
+//        connectionManager.closeExpiredConnections();
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setSocketTimeout(3000) //服务器返回数据(response)的时间，超过抛出read timeout
@@ -56,7 +58,10 @@ public class HTTPClientBean implements ClientFactory{
 
         // 第二个参数设置true，则表示无论如何 同一个请求均发送三次。false表示，只有在失败的时候，尝试再次发送
         HttpRequestRetryHandler retryHandler = new DefaultHttpRequestRetryHandler(3, false);
+
         return HttpClientBuilder.create()
+                .evictExpiredConnections()  // 定时清理过期连接
+                .evictIdleConnections(5, TimeUnit.SECONDS)  // 空闲这么长的连接，也需要清理
                 .setRetryHandler(retryHandler)
                 .setDefaultRequestConfig(requestConfig)
                 .setConnectionManager(connectionManager)
