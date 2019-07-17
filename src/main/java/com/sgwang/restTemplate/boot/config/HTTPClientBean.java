@@ -14,6 +14,8 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @创建人 sgwang
  * @name HTTPClientBean
@@ -41,6 +43,8 @@ public class HTTPClientBean implements ClientFactory{
         connectionManager.setDefaultMaxPerRoute(3);
         // 官方推荐使用这个来检查永久链接的可用性，而不推荐每次请求的时候才去检查，而是启动后台线程 定时清理废弃链接
         connectionManager.setValidateAfterInactivity(2000);
+        connectionManager.closeIdleConnections(100, TimeUnit.MILLISECONDS);
+        connectionManager.closeExpiredConnections();
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setSocketTimeout(3000) //服务器返回数据(response)的时间，超过抛出read timeout
