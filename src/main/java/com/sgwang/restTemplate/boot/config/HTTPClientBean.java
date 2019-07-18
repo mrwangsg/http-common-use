@@ -5,6 +5,7 @@ import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -26,7 +27,8 @@ import java.util.concurrent.TimeUnit;
  * @描述
  */
 @Component
-public class HTTPClientBean implements ClientFactory{
+public class HTTPClientBean implements ClientFactory {
+    private PoolingHttpClientConnectionManager connectionManager;
 
     @Override
     public ClientHttpRequestFactory execute() {
@@ -40,13 +42,14 @@ public class HTTPClientBean implements ClientFactory{
                 .register("http", PlainConnectionSocketFactory.getSocketFactory())
                 .register("https", SSLConnectionSocketFactory.getSocketFactory())
                 .build();
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(registry);
+        connectionManager = new PoolingHttpClientConnectionManager(registry);
         connectionManager.setMaxTotal(3);
         connectionManager.setDefaultMaxPerRoute(3);
-        // 官方推荐使用这个来检查永久链接的可用性，而不推荐每次请求的时候才去检查，而是启动后台线程 定时清理废弃链接
+        // 注解意思是 检测不活跃时长(参数)的连接 将设置为半关闭状态。有助于连接回收
         connectionManager.setValidateAfterInactivity(2000);
-        connectionManager.closeIdleConnections(100, TimeUnit.MILLISECONDS);
-        connectionManager.closeExpiredConnections();
+
+        // 启动监控线程 定时清理关闭和空闲连接
+        new IdleConnectionMonitorThread(connectionManager).start();
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setSocketTimeout(3000) //服务器返回数据(response)的时间，超过抛出read timeout
@@ -61,6 +64,44 @@ public class HTTPClientBean implements ClientFactory{
                 .setDefaultRequestConfig(requestConfig)
                 .setConnectionManager(connectionManager)
                 .build();
+    }
+
+
+    // 连接关闭策略
+    class IdleConnectionMonitorThread extends Thread {
+        private final HttpClientConnectionManager connMgr;
+        private volatile boolean shutdown;
+
+        public IdleConnectionMonitorThread(HttpClientConnectionManager connMgr) {
+            super();
+            this.connMgr = connMgr;
+        }
+
+        @Override
+        public void run() {
+            try {
+                while (!shutdown) {
+                    synchronized (this) {
+                        wait(5000);
+                        // Close expired connections
+                        connMgr.closeExpiredConnections();
+                        // Optionally, close connections
+                        // that have been idle longer than 30 sec
+                        connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
+                    }
+                }
+            } catch (InterruptedException ex) {
+                // terminate
+            }
+        }
+
+        public void shutdown() {
+            shutdown = true;
+            synchronized (this) {
+                notifyAll();
+            }
+        }
+
     }
 
 }
