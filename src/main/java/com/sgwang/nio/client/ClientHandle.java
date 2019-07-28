@@ -35,6 +35,7 @@ public class ClientHandle implements Runnable {
             //如果为 true，则此通道将被置于阻塞模式；如果为 false，则此通道将被置于非阻塞模式
             socketChannel.configureBlocking(false);//开启非阻塞模式
             started = true;
+            System.out.println("客户端已启动，连接地址：" + ip + ":" + port);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -138,8 +139,8 @@ public class ClientHandle implements Runnable {
     }
 
     private void doConnect() throws IOException {
-        if (socketChannel.connect(new InetSocketAddress(host, port))) ;
-        else socketChannel.register(selector, SelectionKey.OP_CONNECT);
+        socketChannel.connect(new InetSocketAddress(host, port));
+        socketChannel.register(selector, SelectionKey.OP_CONNECT);
     }
 
     public void sendMsg(String msg) throws Exception {
